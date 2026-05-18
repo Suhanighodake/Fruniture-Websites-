@@ -1,35 +1,216 @@
-import React, { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import React, { useState } from "react"
+import { FaEye, FaEyeSlash } from "react-icons/fa"
 
-const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
+export default function AuthPage() {
+  const [isLogin, setIsLogin] = useState(true)
 
+  const [showPassword, setShowPassword] =
+    useState(false)
+
+  const [
+    showConfirmPassword,
+    setShowConfirmPassword,
+  ] = useState(false)
+
+  const [successMsg, setSuccessMsg] = useState("")
+  const [loginMsg, setLoginMsg] = useState("")
+  const [errorMsg, setErrorMsg] = useState("")
+
+  // Forgot Password States
+  const [showForgot, setShowForgot] =
+    useState(false)
+
+  const [forgotEmail, setForgotEmail] =
+    useState("")
+
+  const [forgotMsg, setForgotMsg] =
+    useState("")
+
+  // Form Data
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
-  });
+    confirmPassword: "",
+  })
 
+  // Handle Input Change
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    });
-  };
+    })
+  }
 
+  // Validation
+  const validate = () => {
+    const emailRegex = /\S+@\S+\.\S+/
+
+    if (!formData.email || !formData.password) {
+      return "All fields are required"
+    }
+
+    if (!emailRegex.test(formData.email)) {
+      return "Invalid email format"
+    }
+
+    if (formData.password.length < 6) {
+      return "Password must be at least 6 characters"
+    }
+
+    // Register Validation
+    if (!isLogin) {
+      if (!formData.name) {
+        return "Name is required"
+      }
+
+      if (
+        formData.password !==
+        formData.confirmPassword
+      ) {
+        return "Passwords do not match"
+      }
+    }
+
+    return ""
+  }
+
+  // Submit
   const handleSubmit = (
     e: React.FormEvent<HTMLFormElement>
   ) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    console.log(formData);
-  };
+    const error = validate()
+
+    if (error) {
+      setErrorMsg(error)
+
+      setTimeout(() => {
+        setErrorMsg("")
+      }, 3000)
+
+      return
+    }
+
+    setErrorMsg("")
+
+    // Login
+    if (isLogin) {
+      setLoginMsg("✅ Login Successful!")
+
+      setTimeout(() => {
+        setLoginMsg("")
+      }, 3000)
+
+      console.log("LOGIN DATA:", formData)
+    }
+
+    // Register
+    else {
+      setSuccessMsg(
+        "🎉 Registration Successful!"
+      )
+
+      setTimeout(() => {
+        setSuccessMsg("")
+        setIsLogin(true)
+      }, 3000)
+
+      console.log("REGISTER DATA:", formData)
+    }
+  }
+
+  // Forgot Password
+  const handleForgotPassword = () => {
+    if (!forgotEmail) {
+      setForgotMsg("⚠️ Please enter email")
+      return
+    }
+
+    setForgotMsg("📩 Reset link sent!")
+
+    setTimeout(() => {
+      setForgotMsg("")
+      setShowForgot(false)
+      setForgotEmail("")
+    }, 3000)
+  }
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Side */}
+
+      {/* SUCCESS POPUP */}
+      {successMsg && (
+        <div className="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50">
+          {successMsg}
+        </div>
+      )}
+
+      {/* LOGIN POPUP */}
+      {loginMsg && (
+        <div className="fixed top-5 right-5 bg-blue-500 text-white px-6 py-3 rounded-xl shadow-lg z-50">
+          {loginMsg}
+        </div>
+      )}
+
+      {/* ERROR POPUP */}
+      {errorMsg && (
+        <div className="fixed top-5 right-5 bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg z-50">
+          {errorMsg}
+        </div>
+      )}
+
+      {/* FORGOT PASSWORD MODAL */}
+      {showForgot && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+          <div className="bg-white p-6 rounded-2xl w-96">
+
+            <h2 className="text-2xl font-bold mb-4">
+              Forgot Password
+            </h2>
+
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={forgotEmail}
+              onChange={(e) =>
+                setForgotEmail(e.target.value)
+              }
+              className="w-full border px-4 py-3 rounded-xl mb-4"
+            />
+
+            <button
+              onClick={handleForgotPassword}
+              className="w-full bg-black text-white py-3 rounded-xl"
+            >
+              Send Reset Link
+            </button>
+
+            {forgotMsg && (
+              <p className="text-center text-green-600 mt-3">
+                {forgotMsg}
+              </p>
+            )}
+
+            <button
+              onClick={() =>
+                setShowForgot(false)
+              }
+              className="w-full mt-3 text-gray-500"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* LEFT SIDE */}
       <div className="hidden lg:flex lg:w-1/2 relative">
+
         <img
           src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop"
           alt="Furniture"
@@ -37,138 +218,177 @@ const Login = () => {
         />
 
         <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-16 text-white">
-          <h1 className="text-5xl font-bold leading-tight">
-            Modern Furniture
-            <br />
-            For Modern Living
+
+          <h1 className="text-5xl font-bold">
+            Wooden Street Style Furniture
           </h1>
 
-          <p className="mt-6 text-lg text-gray-200 max-w-md">
-            Discover elegant furniture crafted with comfort,
-            style, and premium quality.
+          <p className="mt-6 text-lg text-gray-200">
+            Premium sofas, dining tables,
+            office furniture
           </p>
         </div>
       </div>
 
-      {/* Right Side */}
+      {/* RIGHT SIDE */}
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-[#f8f5f0] px-6">
-        <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-2xl">
-          <div className="mb-8">
-            <h2 className="text-4xl font-bold text-gray-800">
-              Welcome Back
-            </h2>
 
-            <p className="text-gray-500 mt-2">
-              Login to continue shopping
-            </p>
-          </div>
+        <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-2xl">
+
+          {/* TITLE */}
+          <h2 className="text-4xl font-bold">
+            {isLogin
+              ? "Welcome Back"
+              : "Create Account"}
+          </h2>
+
+          <p className="text-gray-500 mt-2 mb-6">
+            {isLogin
+              ? "Login to continue shopping"
+              : "Register to start shopping"}
+          </p>
 
           <form onSubmit={handleSubmit}>
-            {/* Email */}
-            <div className="mb-5">
-              <label className="block mb-2 text-gray-700 font-medium">
-                Email Address
-              </label>
+
+            {/* NAME */}
+            {!isLogin && (
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Full Name"
+                className="w-full border px-4 py-3 rounded-xl mb-4"
+              />
+            )}
+
+            {/* EMAIL */}
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email"
+              className="w-full border px-4 py-3 rounded-xl mb-4"
+            />
+
+            {/* PASSWORD */}
+            <div className="relative mb-4">
 
               <input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                value={formData.email}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
-                required
+                placeholder="Password"
+                className="w-full border px-4 py-3 rounded-xl"
               />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
+                className="absolute right-3 top-3 text-gray-500"
+              >
+                {showPassword ? (
+                  <FaEyeSlash />
+                ) : (
+                  <FaEye />
+                )}
+              </button>
             </div>
 
-            {/* Password */}
-            <div className="mb-3">
-              <label className="block mb-2 text-gray-700 font-medium">
-                Password
-              </label>
+            {/* FORGOT PASSWORD */}
+            {isLogin && (
+              <div className="text-right mb-4">
 
-              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowForgot(true)
+                  }
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            )}
+
+            {/* CONFIRM PASSWORD */}
+            {!isLogin && (
+              <div className="relative mb-4">
+
                 <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
+                  type={
+                    showConfirmPassword
+                      ? "text"
+                      : "password"
+                  }
+                  name="confirmPassword"
+                  value={
+                    formData.confirmPassword
+                  }
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
-                  required
+                  placeholder="Confirm Password"
+                  className="w-full border px-4 py-3 rounded-xl"
                 />
 
                 <button
                   type="button"
                   onClick={() =>
-                    setShowPassword(!showPassword)
+                    setShowConfirmPassword(
+                      !showConfirmPassword
+                    )
                   }
-                  className="absolute right-4 top-4 text-gray-500"
+                  className="absolute right-3 top-3 text-gray-500"
                 >
-                  {showPassword ? (
+                  {showConfirmPassword ? (
                     <FaEyeSlash />
                   ) : (
                     <FaEye />
                   )}
                 </button>
               </div>
-            </div>
+            )}
 
-            {/* Forgot Password */}
-            <div className="flex justify-end mb-6">
-              <button
-                type="button"
-                className="text-sm text-gray-600 hover:text-black"
-              >
-                Forgot Password?
-              </button>
-            </div>
-
-            {/* Login Button */}
+            {/* SUBMIT BUTTON */}
             <button
               type="submit"
-              className="w-full bg-black text-white py-3 rounded-xl text-lg font-medium hover:bg-gray-800 transition"
+              className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition"
             >
-              Login
+              {isLogin
+                ? "Login"
+                : "Register"}
             </button>
-
-            {/* Divider */}
-            <div className="flex items-center my-6">
-              <div className="flex-1 h-px bg-gray-300"></div>
-
-              <p className="px-4 text-sm text-gray-400">
-                OR
-              </p>
-
-              <div className="flex-1 h-px bg-gray-300"></div>
-            </div>
-
-            {/* Google Login */}
-            <button
-              type="button"
-              className="w-full border border-gray-300 py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-100 transition"
-            >
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google"
-                className="w-5 h-5"
-              />
-
-              Continue with Google
-            </button>
-
-            {/* Register */}
-            <p className="text-center text-gray-500 mt-8">
-              Don’t have an account?{" "}
-              <span className="text-black font-semibold cursor-pointer hover:underline">
-                Register
-              </span>
-            </p>
           </form>
+
+          {/* SWITCH LOGIN / REGISTER */}
+          <p className="text-center mt-6 text-gray-600">
+
+            {isLogin
+              ? "Don't have account?"
+              : "Already have account?"}
+
+            <button
+              onClick={() =>
+                setIsLogin(!isLogin)
+              }
+              className="ml-2 font-bold text-black hover:underline"
+            >
+              {isLogin
+                ? "Register"
+                : "Login"}
+            </button>
+          </p>
         </div>
       </div>
     </div>
-  );
-};
-
-export default Login;
+  )
+}
